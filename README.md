@@ -1,2 +1,2 @@
 # THE-GAME
-A Kotlin terminal RPG game - built with Claude
+A Kotlin terminal RPG game - By Laurentiu Topliceanu
