@@ -1,11 +1,11 @@
 class Player(val name: String) {
+    var maxHp: Int = 100
     var hp: Int = 100
-    val maxHp: Int = 100
     var attackPower: Int = 15
     var defence: Int = 5
     var level: Int = 1
     var xp: Int = 0
-    val xpToNextLevel: Int = 100
+    var xpToNextLevel: Int = 100
     val inventory: MutableList<Item> = mutableListOf()
     var gold: Int = 50
 
@@ -31,11 +31,14 @@ class Player(val name: String) {
     private fun levelUp() {
         level++
         xp = 0
+        xpToNextLevel = (xpToNextLevel * 1.4).toInt()
+        maxHp += 20
         attackPower += 5
         defence += 2
         hp = maxHp
         println("  *** $name levelled up to Level $level! ***")
-        println("  Attack: $attackPower | Defence: $defence")
+        println("  MaxHP: $maxHp | Attack: $attackPower | Defence: $defence")
+        println("  Next level at: $xpToNextLevel XP")
     }
 
     fun useItem(item: Item) {
