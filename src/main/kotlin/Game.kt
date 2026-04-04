@@ -1,32 +1,52 @@
 class Game {
+
     fun run() {
         println("================================")
         println("   Welcome to  T H E  G A M E  ")
         println("================================")
-        print("Enter your hero name: ")
-        val name = readLine()?.trim()?.ifBlank { "Hero" } ?: "Hero"
-        val player = Player(name)
-        println("\nGreetings, $name! Your quest begins...")
+        val player = loadOrCreatePlayer()
         mainLoop(player)
     }
+
+    private fun loadOrCreatePlayer(): Player {
+        if (SaveManager.hasSave()) {
+            println("\nSave file found! Load it? (y/n)")
+            if (readLine()?.trim()?.lowercase() == "y") {
+                val loaded = SaveManager.load()
+                if (loaded != null) return loaded
+            }
+        }
+        print("Enter your hero name: ")
+        val name = readLine()?.trim()?.ifBlank { "Hero" } ?: "Hero"
+        println("\nGreetings, $name! Your quest begins...")
+        return Player(name)
+    }
+
     private fun mainLoop(player: Player) {
         var running = true
         while (running && player.isAlive()) {
             player.showStats()
-            println("\nWhere do you go?")
-            println("1) Dark Forest  2) Mountain Pass  3) Ancient Ruins  4) Shop  5) Rest  6) Quit")
+            println("\nWhat do you do?")
+            println("1) Dark Forest  2) Mountain Pass  3) Ancient Ruins")
+            println("4) Shop  5) Rest  6) Save  7) Save & Quit")
             when (readLine()?.trim()) {
                 "1" -> encounter(player, "Dark Forest", EnemyFactory.goblin(), EnemyFactory.orc())
                 "2" -> encounter(player, "Mountain Pass", EnemyFactory.orc(), EnemyFactory.troll())
                 "3" -> encounter(player, "Ancient Ruins", EnemyFactory.troll(), EnemyFactory.dragon())
                 "4" -> shop(player)
                 "5" -> rest(player)
-                "6" -> { running = false; println("Farewell, ${player.name}!") }
+                "6" -> SaveManager.save(player)
+                "7" -> { SaveManager.save(player); running = false; println("See you next time, ${player.name}!") }
                 else -> println("Invalid choice.")
             }
         }
-        if (!player.isAlive()) println("\n You have fallen. Game over.")
+        if (!player.isAlive()) {
+            println("\n You have fallen. Game over.")
+            println("Delete save file? (y/n)")
+            if (readLine()?.trim()?.lowercase() == "y") SaveManager.deleteSave()
+        }
     }
+
     private fun encounter(player: Player, location: String, vararg enemies: Enemy) {
         println("\nYou venture into $location...")
         for (enemy in enemies) {
@@ -39,6 +59,7 @@ class Game {
         }
         println("You return safely from $location.")
     }
+
     private fun shop(player: Player) {
         println("\n=== SHOP ===")
         println("Gold: ${player.gold}")
@@ -55,6 +76,7 @@ class Game {
             else -> println("Safe travels.")
         }
     }
+
     private fun buy(player: Player, item: Item, cost: Int) {
         if (player.gold >= cost) {
             player.gold -= cost
@@ -62,6 +84,7 @@ class Game {
             println("  Purchased ${item.name}! Gold: ${player.gold}")
         } else println("  Not enough gold!")
     }
+
     private fun rest(player: Player) {
         if (player.gold >= 15) {
             player.gold -= 15
